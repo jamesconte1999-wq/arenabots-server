@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.*
+*.log
+*.db
+*.sqlite
+*.db.json
+arenabots.db.json
+.DS_Store
+dist/
+# Local tooling / tests — not needed in production image.
+smoke-*.js
+scripts/
+.gitignore
+.git/

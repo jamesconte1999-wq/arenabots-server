@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+*.log
+*.db
+*.db.json
+*.sqlite
+arenabots.db.json
+arenabots.db
+.DS_Store
+dist/

@@ -1,0 +1,52 @@
+# Render.com infrastructure-as-code blueprint.
+# After creating a Render account, New → Blueprint → point at this repo and
+# Render will provision the service automatically.
+services:
+  - type: web
+    name: arenabots-server
+    runtime: docker
+    plan: starter           # ~$7/mo always-on; FREE plan sleeps → breaks live matches
+    region: oregon          # pick the region closest to most players
+    healthCheckPath: /health
+    numInstances: 1         # scale up once concurrent players warrant it
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 2567
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        sync: false          # set to your real client URL(s) in dashboard,
+                             # comma-separated, e.g.
+                             # https://arenabots-client.onrender.com,https://arenabots.io
+      - key: DB_FILE
+        value: /data/arenabots.db.json
+      # ----- Stripe ----------------------------------------------------------
+      - key: STRIPE_SECRET_KEY
+        sync: false          # paste in Render dashboard — never commit
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false          # obtain after registering the webhook endpoint
+      - key: PUBLIC_BASE_URL
+        sync: false          # your client URL (where Checkout redirects on success)
+      - key: STRIPE_PRICE_CROWNS_STARTER
+        sync: false
+      - key: STRIPE_PRICE_CROWNS_PLUS
+        sync: false
+      - key: STRIPE_PRICE_CROWNS_PRO
+        sync: false
+      - key: STRIPE_PRICE_CROWNS_ELITE
+        sync: false
+      - key: STRIPE_PRICE_PRO_MONTHLY
+        sync: false
+      - key: STRIPE_PRICE_PRO_YEARLY
+        sync: false
+      - key: STRIPE_PRICE_PRO_LIFETIME
+        sync: false
+    disk:
+      name: arenabots-data
+      mountPath: /data
+      sizeGB: 1
