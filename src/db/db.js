@@ -20,6 +20,7 @@ const state = {
   accounts: {},   // id -> account
   byUsername: {}, // lowercase username -> id
   stats: {},      // accountId -> stats
+  presets: {},    // accountId -> array of preset objects
 };
 
 loadFromDisk();
@@ -83,6 +84,7 @@ function createAccount(username, passwordHash, displayName) {
   if (!state.purchases)    state.purchases = {};
   state.entitlements[id] = blankEntitlements(id);
   state.purchases[id] = [];
+  state.presets[id] = [];
   persist();
   return id;
 }
@@ -272,7 +274,67 @@ function getPurchaseHistory(accountId) {
   return [...(state.purchases[accountId] || [])];
 }
 
+// ---------------------------------------------------------------------------
+// Presets API
+// ---------------------------------------------------------------------------
+const MAX_PRESETS = 5;
+
+function ensurePresetsTable() {
+  if (!state.presets) state.presets = {};
+  // Backfill: any account created before presets existed gets empty array
+  for (const id of Object.keys(state.accounts)) {
+    if (!state.presets[id]) state.presets[id] = [];
+  }
+}
+
+function getPresets(accountId) {
+  ensurePresetsTable();
+  return [...(state.presets[accountId] || [])];
+}
+
+function savePreset(accountId, preset) {
+  ensurePresetsTable();
+  if (!state.presets[accountId]) state.presets[accountId] = [];
+  
+  const presets = state.presets[accountId];
+  // Check if already exists with same name
+  const existingIndex = presets.findIndex(p => p.name === preset.name);
+  
+  if (existingIndex >= 0) {
+    // Update existing
+    presets[existingIndex] = {
+      name: preset.name,
+      spec: preset.spec,
+      updated_at: new Date().toISOString(),
+    };
+  } else {
+    // Add new if under limit
+    if (presets.length >= MAX_PRESETS) {
+      throw new Error(`Maximum ${MAX_PRESETS} presets allowed`);
+    }
+    presets.push({
+      name: preset.name,
+      spec: preset.spec,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  }
+  
+  persist();
+  return presets;
+}
+
+function deletePreset(accountId, presetName) {
+  ensurePresetsTable();
+  if (!state.presets[accountId]) return [];
+  
+  state.presets[accountId] = state.presets[accountId].filter(p => p.name !== presetName);
+  persist();
+  return state.presets[accountId];
+}
+
 ensurePaymentTables();
+ensurePresetsTable();
 
 module.exports = {
   createAccount, findByUsername, findById,
@@ -281,4 +343,6 @@ module.exports = {
   setStripeCustomerId, findByStripeCustomerId,
   getEntitlements, addCrowns, spendCrowns,
   setProUntil, recordPurchase, getPurchaseHistory,
+  // presets
+  getPresets, savePreset, deletePreset,
 };

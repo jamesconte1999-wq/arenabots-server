@@ -11,6 +11,7 @@ const { monitor } = require('@colyseus/monitor');
 const { ArenaRoom } = require('./rooms/ArenaRoom');
 const { router: authRouter } = require('./auth/auth');
 const { router: paymentsRouter, webhookHandler } = require('./payments/stripe');
+const db = require('./db/db');
 
 const PORT = Number(process.env.PORT) || 2567;
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
@@ -42,6 +43,42 @@ app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 app.use('/api', authRouter);
 // REST: payments (products, entitlements, checkout)
 app.use('/api', paymentsRouter);
+
+// REST: presets (requires auth)
+app.get('/api/presets', (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const presets = db.getPresets(userId);
+    res.json({ presets });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/presets', (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const { name, spec } = req.body;
+    if (!name || !spec) return res.status(400).json({ error: 'Missing name or spec' });
+    const presets = db.savePreset(userId, { name, spec });
+    res.json({ presets });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete('/api/presets/:name', (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const presets = db.deletePreset(userId, req.params.name);
+    res.json({ presets });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Colyseus monitor (admin dashboard at /colyseus)
 app.use('/colyseus', monitor());
