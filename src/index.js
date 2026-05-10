@@ -9,7 +9,7 @@ const { WebSocketTransport } = require('@colyseus/ws-transport');
 const { monitor } = require('@colyseus/monitor');
 
 const { ArenaRoom } = require('./rooms/ArenaRoom');
-const { router: authRouter } = require('./auth/auth');
+const { router: authRouter, requireAuth } = require('./auth/auth');
 const { router: paymentsRouter, webhookHandler } = require('./payments/stripe');
 const db = require('./db/db');
 
@@ -45,9 +45,8 @@ app.use('/api', authRouter);
 app.use('/api', paymentsRouter);
 
 // REST: presets (requires auth)
-app.get('/api/presets', (req, res) => {
-  const userId = req.user?.id;
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+app.get('/api/presets', requireAuth, (req, res) => {
+  const userId = req.user.id;
   try {
     const presets = db.getPresets(userId);
     res.json({ presets });
@@ -56,9 +55,8 @@ app.get('/api/presets', (req, res) => {
   }
 });
 
-app.post('/api/presets', (req, res) => {
-  const userId = req.user?.id;
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+app.post('/api/presets', requireAuth, (req, res) => {
+  const userId = req.user.id;
   try {
     const { name, spec } = req.body;
     if (!name || !spec) return res.status(400).json({ error: 'Missing name or spec' });
@@ -69,9 +67,8 @@ app.post('/api/presets', (req, res) => {
   }
 });
 
-app.delete('/api/presets/:name', (req, res) => {
-  const userId = req.user?.id;
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+app.delete('/api/presets/:name', requireAuth, (req, res) => {
+  const userId = req.user.id;
   try {
     const presets = db.deletePreset(userId, req.params.name);
     res.json({ presets });
