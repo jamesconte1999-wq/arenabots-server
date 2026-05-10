@@ -1,0 +1,106 @@
+{
+  "nextId": 4,
+  "accounts": {
+    "1": {
+      "id": 1,
+      "username": "James",
+      "password_hash": "$2a$10$a5DeBNJPxVLJ45D2XSEHsuzfQulbGp96JHCytuEnmm0Y3rXMrPDfW",
+      "display_name": "James",
+      "created_at": "2026-05-10T09:32:37.342Z",
+      "stripe_customer_id": "cus_UUSj1OvAb8AZeA"
+    },
+    "2": {
+      "id": 2,
+      "username": "leonidas",
+      "password_hash": "$2a$10$tCcJd/hyS0u2qmGhGn27f.ZA9yNHhK6TFTci4YYdq7bAsh9nI/vwa",
+      "display_name": "Leonidas",
+      "created_at": "2026-05-10T09:42:55.318Z",
+      "stripe_customer_id": null
+    },
+    "3": {
+      "id": 3,
+      "username": "theseus",
+      "password_hash": "$2a$10$oljoRNLmTBAxinSkL2v/FuoxKFSvqv9OwOawlB9NtizCt4/ee812K",
+      "display_name": "Theseusbro",
+      "created_at": "2026-05-10T09:57:02.450Z",
+      "stripe_customer_id": null
+    }
+  },
+  "byUsername": {
+    "james": 1,
+    "leonidas": 2,
+    "theseus": 3
+  },
+  "stats": {
+    "1": {
+      "account_id": 1,
+      "xp": 900,
+      "level": 4,
+      "rank_points": 12,
+      "wins": 4,
+      "losses": 5,
+      "kills": 2,
+      "matches_played": 9,
+      "streak_current": 0,
+      "streak_best": 2,
+      "last_played_at": "2026-05-10T09:54:40.365Z"
+    },
+    "2": {
+      "account_id": 2,
+      "xp": 1100,
+      "level": 4,
+      "rank_points": 84,
+      "wins": 6,
+      "losses": 2,
+      "kills": 4,
+      "matches_played": 8,
+      "streak_current": 2,
+      "streak_best": 3,
+      "last_played_at": "2026-05-10T09:54:40.364Z"
+    },
+    "3": {
+      "account_id": 3,
+      "xp": 0,
+      "level": 1,
+      "rank_points": 0,
+      "wins": 0,
+      "losses": 0,
+      "kills": 0,
+      "matches_played": 0,
+      "streak_current": 0,
+      "streak_best": 0,
+      "last_played_at": null
+    }
+  },
+  "entitlements": {
+    "1": {
+      "account_id": 1,
+      "crowns": 10000,
+      "pro_until": "2099-12-31T23:59:59.999Z",
+      "pro_plan": "exclusive",
+      "last_event_at": null
+    },
+    "2": {
+      "account_id": 2,
+      "crowns": 10000,
+      "pro_until": "2099-12-31T23:59:59.999Z",
+      "pro_plan": "exclusive",
+      "last_event_at": null
+    },
+    "3": {
+      "account_id": 3,
+      "crowns": 10000,
+      "pro_until": "2099-12-31T23:59:59.999Z",
+      "pro_plan": "exclusive",
+      "last_event_at": null
+    }
+  },
+  "purchases": {
+    "1": [],
+    "2": [],
+    "3": []
+  },
+  "byStripeCustomer": {
+    "cus_UUSj1OvAb8AZeA": 1
+  }
+}

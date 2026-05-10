@@ -86,6 +86,18 @@ class ArenaRoom extends Room {
       // request body so users can't spoof other players' names visually.
       const acctName = sanitizeName(client.auth.account.name);
       if (acctName) bot.name = acctName;
+
+      // Check pro status from database
+      try {
+        const entitlements = db.getEntitlements(bot.accountId);
+        if (entitlements && entitlements.pro_until) {
+          const now = new Date();
+          const proUntil = new Date(entitlements.pro_until);
+          bot.isPro = proUntil > now;
+        }
+      } catch (err) {
+        console.warn('[ArenaRoom] failed to check pro status:', err.message);
+      }
     }
 
     this.spawnAtRandom(bot);

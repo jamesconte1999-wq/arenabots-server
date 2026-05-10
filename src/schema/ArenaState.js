@@ -19,6 +19,7 @@ class BotState extends Schema {
     this.pattern = 'solid';
     this.chassis = 'brick';
     this.weapon = 'spinner';
+    this.isPro = false; // PRO badge status
 
     // Pose (sync'd)
     this.x = 0;
@@ -45,6 +46,7 @@ class BotState extends Schema {
     this.lastHitMap = new Map();      // target.id -> seconds
     this.spec = null;                  // resolved chassis/weapon refs
     this.derived = null;               // derived stats (accel, dmgMul, etc.)
+    this.accountId = null;             // linked account ID (server-only)
   }
 }
 
@@ -56,6 +58,7 @@ defineTypes(BotState, {
   pattern: 'string',
   chassis: 'string',
   weapon: 'string',
+  isPro: 'boolean',
   x: 'number',
   y: 'number',
   angle: 'number',
