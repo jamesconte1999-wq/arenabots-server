@@ -80,6 +80,53 @@ app.delete('/api/presets/:name', requireAuth, (req, res) => {
 // Colyseus monitor (admin dashboard at /colyseus)
 app.use('/colyseus', monitor());
 
+// TEMPORARY: Admin endpoint to add evelyn account to production
+app.post('/admin/add-evelyn', async (req, res) => {
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'temp-admin-secret-2024';
+  const { secret } = req.body;
+  
+  if (secret !== ADMIN_SECRET) {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  
+  const bcrypt = require('bcryptjs');
+  const username = 'evelyn';
+  const password = 'evelyn123';
+  const displayName = 'Evelyn';
+  
+  try {
+    // Check if account exists
+    const existing = db.findByUsername(username);
+    if (existing) {
+      // Update entitlements if exists
+      db.setProUntil(existing.id, 'lifetime', 'exclusive');
+      db.addCrowns(existing.id, 10000);
+      return res.json({ message: 'Updated existing evelyn account', id: existing.id });
+    }
+    
+    // Create new account
+    const passwordHash = await bcrypt.hash(password, 10);
+    const accountId = db.createAccount(username, passwordHash, displayName);
+    db.setProUntil(accountId, 'lifetime', 'exclusive');
+    db.addCrowns(accountId, 10000);
+    db.saveStats(accountId, {
+      xp: 100000,
+      level: 32,
+      rank_points: 10000,
+      wins: 500,
+      losses: 50,
+      kills: 5000,
+      matches_played: 550,
+      streak_current: 10,
+      streak_best: 50
+    });
+    
+    res.json({ message: 'Created evelyn account', id: accountId, username, password });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const server = http.createServer(app);
 const gameServer = new Server({
   transport: new WebSocketTransport({ server }),
