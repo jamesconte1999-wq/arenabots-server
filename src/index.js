@@ -127,6 +127,39 @@ app.post('/admin/add-evelyn', async (req, res) => {
   }
 });
 
+// TEMPORARY: Admin endpoint to reset password
+app.post('/admin/reset-password', async (req, res) => {
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'temp-admin-secret-2024';
+  const { secret, username, newPassword } = req.body;
+  
+  if (secret !== ADMIN_SECRET) {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  
+  const bcrypt = require('bcryptjs');
+  
+  try {
+    const acct = db.findByUsername(username);
+    if (!acct) {
+      return res.status(404).json({ error: 'account not found' });
+    }
+    
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    
+    // Direct mutation since db module doesn't expose password update
+    const fs = require('fs');
+    const path = require('path');
+    const DB_FILE = process.env.DB_FILE || path.join(__dirname, '..', 'arenabots.db.json');
+    const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    data.accounts[acct.id].password_hash = passwordHash;
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+    
+    res.json({ message: 'Password reset', username });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const server = http.createServer(app);
 const gameServer = new Server({
   transport: new WebSocketTransport({ server }),
