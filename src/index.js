@@ -160,6 +160,36 @@ app.post('/admin/reset-password', async (req, res) => {
   }
 });
 
+// TEMPORARY: Diagnostic endpoint
+app.get('/admin/diag', (req, res) => {
+  const ADMIN_SECRET = process.env.ADMIN_SECRET || 'temp-admin-secret-2024';
+  const secret = req.headers['x-admin-secret'];
+  if (secret !== ADMIN_SECRET) {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  
+  const fs = require('fs');
+  const path = require('path');
+  const DB_FILE = process.env.DB_FILE || path.join(__dirname, '..', 'arenabots.db.json');
+  
+  let fileData = null;
+  try {
+    fileData = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+  } catch (e) {
+    fileData = { error: e.message };
+  }
+  
+  const evelyn = db.findByUsername('evelyn');
+  const leonidas = db.findByUsername('leonidas');
+  
+  res.json({
+    db_file: DB_FILE,
+    file_accounts: fileData.accounts ? Object.keys(fileData.accounts).map(k => ({ id: k, username: fileData.accounts[k].username })) : null,
+    memory_evelyn: evelyn ? { id: evelyn.id, username: evelyn.username, hash_prefix: evelyn.password_hash?.slice(0, 20) } : null,
+    memory_leonidas: leonidas ? { id: leonidas.id, username: leonidas.username, hash_prefix: leonidas.password_hash?.slice(0, 20) } : null,
+  });
+});
+
 const server = http.createServer(app);
 const gameServer = new Server({
   transport: new WebSocketTransport({ server }),
